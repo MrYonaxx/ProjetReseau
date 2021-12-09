@@ -12,10 +12,19 @@ public class Boss : NetworkBehaviour, ITargetable
 
     NetworkVariable<int> health;
 
+    [SerializeField]
+    BossState currentState = null;
+
     // Start is called before the first frame update
     void Awake()
     {
         health = new NetworkVariable<int>(maxHP);
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+            SetState(currentState);
     }
 
     // Update is called once per frame
@@ -23,8 +32,14 @@ public class Boss : NetworkBehaviour, ITargetable
     {
         if(IsServer)
         {
-
+            currentState.UpdateState(this);
         }
+    }
+
+    public void SetState(BossState newState)
+    {
+        currentState = newState;
+        currentState.StartState(this);
     }
 
     public Vector3 GetPos()
