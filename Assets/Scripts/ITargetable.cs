@@ -11,7 +11,7 @@ public struct AttackMessage
 public delegate void ActionTarget(ITargetable target);
 public interface ITargetable
 {
-    void TakeDamage(AttackMessage attackMessage, double time);
+    void TakeDamage(AttackMessage attackMessage);
 
     Vector3 GetPos();
 

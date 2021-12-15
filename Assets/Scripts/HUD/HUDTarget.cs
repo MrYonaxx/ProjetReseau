@@ -29,6 +29,8 @@ public class HUDTarget : MonoBehaviour
     {
         if (c != null)
             c.OnTargetSelected -= DrawTarget;
+        if (previousTarget != null)
+            previousTarget.GetHealthVariable().OnValueChanged -= DrawHP;
     }
 
 

@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 
 
-public class BossStateP1 : BossState
+public class BossStateP1_Stack : BossState
 {
     [SerializeField]
     Vector2Int time;

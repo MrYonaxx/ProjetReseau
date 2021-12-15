@@ -4,37 +4,37 @@ using UnityEngine;
 using Unity.Netcode;
 
 
-public class BossStateP1 : BossState
+public class BossStateP1_Spread : BossState
 {
     [SerializeField]
     Vector2Int time;
     [SerializeField]
     NetworkObject bossAoE = null;
+    [SerializeField]
+    float aoeScale = 2;
 
     [SerializeField]
     BossState[] endStates = null;
-
-    List<Character> players;
-    Character target = null;
 
     float t = 0f;
 
     public override void StartState(Boss boss)
     {
         t = Random.Range(time.x, time.y);
-        target = NetworkManager.Singleton.ConnectedClients[(ulong)Random.Range(0, NetworkManager.Singleton.ConnectedClients.Count)].PlayerObject.GetComponent<Character>();
     }
+
     public override void UpdateState(Boss boss)
     {
         t -= Time.deltaTime;
-        boss.transform.LookAt(target.transform, Vector3.up);
-        boss.transform.eulerAngles = new Vector3(0, boss.transform.eulerAngles.y, 0);
         if(t <= 0)
         {
-            CreateAoE(target.transform);
-            boss.PlayBossAnimationClientRpc(AnimationBoss.Attack1);
+            for (int i = 0; i < NetworkManager.Singleton.ConnectedClients.Count; i++)
+            {
+                CreateAoE(NetworkManager.Singleton.ConnectedClients[(ulong)i].PlayerObject.transform);
+            }
+
+            boss.PlayBossAnimationClientRpc(AnimationBoss.Attack2);
             t = Random.Range(time.x, time.y) * 3;
-            target = NetworkManager.Singleton.ConnectedClients[(ulong)Random.Range(0, NetworkManager.Singleton.ConnectedClients.Count)].PlayerObject.GetComponent<Character>();
             boss.SetState(endStates[Random.Range(0, endStates.Length - 1)]);
         }
 
@@ -45,5 +45,7 @@ public class BossStateP1 : BossState
     {
         NetworkObject go = Instantiate(bossAoE, target.position, Quaternion.identity);
         go.Spawn();
+        go.TrySetParent(target);
+        go.transform.localScale = new Vector3(aoeScale, 1, aoeScale);
     }
 }
