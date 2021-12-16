@@ -13,6 +13,8 @@ public class IntroManager : MonoBehaviour
     PlayableDirector director = null;
 
     [SerializeField]
+    GameObject canvas = null;
+    [SerializeField]
     Animator fade = null;
 
     [SerializeField]
@@ -29,10 +31,13 @@ public class IntroManager : MonoBehaviour
     void Start()
     {
         PlayerTeam.Instance.OnPlayerAdded += StartIntro;
+
     }
 
     void StartIntro(Character c, int id)
     {
+        if (NetworkManager.Singleton.IsHost)
+            GetComponent<AudioSource>().Play();
 
         c.transform.position = positions[id-1].position;
 
@@ -44,6 +49,7 @@ public class IntroManager : MonoBehaviour
             character = c;
             cameraIntro.enabled = false;
             director.gameObject.SetActive(true);
+            canvas.gameObject.SetActive(false);
             StartCoroutine(IntroCoroutine());
         }
     }
@@ -73,5 +79,6 @@ public class IntroManager : MonoBehaviour
         cameraIntro.enabled = true;
         character.Active();
         director.gameObject.SetActive(false);
+        canvas.gameObject.SetActive(true);
     }
 }

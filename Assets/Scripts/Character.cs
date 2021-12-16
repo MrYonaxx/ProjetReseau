@@ -51,7 +51,7 @@ public class Character : NetworkBehaviour, ITargetable
 {
     [SerializeField]
     int maxHealth = 3;
-    [SerializeField]
+
     NetworkVariable<int> health;
 
     [Header("Stats")]
@@ -79,6 +79,8 @@ public class Character : NetworkBehaviour, ITargetable
     [Header("UI")]
     [SerializeField]
     TextMeshPro textCharacterName = null;
+    [SerializeField]
+    SpriteRenderer lightRampant = null;
 
     Animator animator = null;
     CharacterController characterController = null;
@@ -90,6 +92,8 @@ public class Character : NetworkBehaviour, ITargetable
     float timeGlobalCooldown = 3f;
     bool active = false;
 
+    // ça n'a rien à faire là mais tant pis
+    public int lightRampantID = 0;
 
     public event ActionTarget OnTargetSelected;
     public event ActionAttack OnSkillUsed;
@@ -164,7 +168,7 @@ public class Character : NetworkBehaviour, ITargetable
             Ray ray = CameraController.Instance.Cam.ScreenPointToRay(Input.mousePosition);
 
             RaycastHit rayHit;
-            if(Physics.Raycast(ray, out rayHit, 20, layerMaskTargeting))
+            if(Physics.Raycast(ray, out rayHit, 50, layerMaskTargeting))
             {
                 target = rayHit.collider.GetComponent<ITargetable>();
                 if (target != null)
@@ -299,6 +303,32 @@ public class Character : NetworkBehaviour, ITargetable
         }
     }
 
+
+    public void SetLightRampant(int id)
+    {
+        lightRampantID = id;
+        SetLightRampantClientRpc(id);
+    }
+
+    [ClientRpc]
+    public void SetLightRampantClientRpc(int id)
+    {
+        switch (id)
+        {
+            case 0:
+                lightRampant.color = Color.clear;
+                break;
+            case 1:
+                lightRampant.color = Color.blue;
+                break;
+            case 2:
+                lightRampant.color = Color.green;
+                break;
+            case 3:
+                lightRampant.color = new Color(1, 0.5f, 0.5f, 1);
+                break;
+        }
+    }
 
     // Partie ITargetable
     // Appelé par le serveur généralement

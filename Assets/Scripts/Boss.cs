@@ -30,6 +30,9 @@ public class Boss : NetworkBehaviour, ITargetable
     int hit = 1;
     bool isDead = false;
 
+    [HideInInspector]
+    public bool isArmor = false;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -130,7 +133,7 @@ public class Boss : NetworkBehaviour, ITargetable
             PlayBossAnimationClientRpc(AnimationBoss.Dead);
             isDead = true;
         }
-        else if(attackMessage.Damage > 0)
+        else if(attackMessage.Damage > 0 && !isArmor)
         {
             hit *= -1;
             if(hit < 0)

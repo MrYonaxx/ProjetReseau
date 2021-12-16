@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 
 
-public class BossStateP2 : BossState
+public class BossStateP3 : BossState
 {
     [Space]
     [Space]
@@ -12,14 +12,15 @@ public class BossStateP2 : BossState
     float timeStartCamera;
     [SerializeField]
     float timeCamera;
+
     [SerializeField]
-    AreaOfHeal healAoE = null;
+    AreaOfLightRampant[] lightRampants;
 
     [Space]
     [SerializeField]
     Camera mainCam = null;
     [SerializeField]
-    Camera cinematicCam = null;
+    GameObject cinematicCam = null;
 
     [Space]
     [SerializeField]
@@ -39,10 +40,9 @@ public class BossStateP2 : BossState
         t -= Time.deltaTime;
         if(t <= 0 && !startCameraZoom)
         {
-            boss.transform.LookAt(healAoE.transform, Vector3.up);
             boss.transform.eulerAngles = new Vector3(0, boss.transform.eulerAngles.y, 0);
             boss.PlayBossAnimationClientRpc(AnimationBoss.Attack3);
-            healAoE.SetActive(true);
+            StartCoroutine(LightRampantCoroutine());
 
             // Cinematic
             boss.isArmor = true;
@@ -61,11 +61,20 @@ public class BossStateP2 : BossState
 
     }
 
+    private IEnumerator LightRampantCoroutine()
+    {
+        for (int i = 0; i < lightRampants.Length; i++)
+        {
+            lightRampants[i].SetActive(true);
+            yield return new WaitForSeconds(0.4f);
+        }
+    }
+
     [ClientRpc]
     private void NewPhaseClientRPC()
     {
         mainCam.enabled = !mainCam.enabled;
-        cinematicCam.gameObject.SetActive(!cinematicCam.isActiveAndEnabled);
+        cinematicCam.gameObject.SetActive(!cinematicCam.activeInHierarchy);
     }
 
 }
