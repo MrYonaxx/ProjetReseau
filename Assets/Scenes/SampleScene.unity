@@ -9954,7 +9954,7 @@ MonoBehaviour:
   healthThreshold: 0
   nextPhaseState: {fileID: 0}
   time: {x: 3, y: 4}
-  timeBeforeDamage: 5
+  timeBeforeDamage: 8
   damage: 3
   endStates:
   - {fileID: 776913241}

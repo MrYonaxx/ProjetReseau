@@ -360,7 +360,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 725ac56048c9d184daf61a3becfd40ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 5
+  maxHealth: 7
   speed: 5
   globalCooldown: 2
   layerMaskTargeting:
