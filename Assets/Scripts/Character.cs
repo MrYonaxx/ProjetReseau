@@ -38,6 +38,15 @@ public class AttackData
         t = 0;
     }
 }
+
+public enum CharacterSkillAnimation
+{
+    Attack,
+    Skill1,
+    Skill2,
+    Skill3
+}
+
 public class Character : NetworkBehaviour, ITargetable
 {
     [SerializeField]
@@ -79,6 +88,7 @@ public class Character : NetworkBehaviour, ITargetable
 
     float timeAutoAttack = 3f;
     float timeGlobalCooldown = 3f;
+    bool active = false;
 
 
     public event ActionTarget OnTargetSelected;
@@ -91,11 +101,24 @@ public class Character : NetworkBehaviour, ITargetable
             CameraController.Instance.SetFocus(this.transform);
             characterController = GetComponent<CharacterController>();
             animationTime /= 30f;
-
         }
+
+        textCharacterName.text = "Player " + (OwnerClientId + 1).ToString();
         animator = GetComponentInChildren<Animator>();
-        health = new NetworkVariable<int>(maxHealth);
-        textCharacterName.text = "Player " + (OwnerClientId+1).ToString();
+
+        PlayerTeam.Instance.AddToTeam(this);
+    }
+
+    public void Active()
+    {
+        active = true;
+    }
+
+
+    void Awake()
+    {
+        if(IsServer)
+            health = new NetworkVariable<int>(NetworkVariableReadPermission.Everyone, maxHealth);
     }
 
     // Note de recherche :
@@ -104,7 +127,7 @@ public class Character : NetworkBehaviour, ITargetable
     // Pour que les clients aient le droit de modifier le transform il faut un ClientNetworkTransform
     private void Update()
     {
-        if (IsOwner)
+        if (IsOwner && active)
         {
             Move(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
             SelectTarget();
@@ -163,6 +186,7 @@ public class Character : NetworkBehaviour, ITargetable
             {
                 AttackMessage attackMessage = new AttackMessage();
                 attackMessage.Damage = damage;
+                attackMessage.AnimationID = 0;
 
                 // Puisque on peut appelé les Rpc présents uniquement dans le même script, j'envois l'info de qui je veux
                 // taper à la version serveur de mon objet, ce dernier retrouve l'objet targetID et le tabasse
@@ -209,6 +233,7 @@ public class Character : NetworkBehaviour, ITargetable
         {
             AttackMessage attackMessage = new AttackMessage();
             attackMessage.Damage = attack.Damage;
+            attackMessage.AnimationID = (CharacterSkillAnimation) (attack.ID + 1);
             attack.Use();
 
             AttackServerRpc(targetID, attackMessage, NetworkManager.LocalTime.Time + (attack.AnimationDamageTime / 30f));
@@ -229,6 +254,8 @@ public class Character : NetworkBehaviour, ITargetable
             // normalement GetComponent peut jamais échouer (normalement)
             target = GetNetworkObject(id).GetComponent<ITargetable>();
         }
+        // Envois l'info aux autres client qu'on joue une anim
+        PlayAnimationClientRpc(attackMessage.AnimationID);
 
         // On tente de synchroniser l'animation d'attaque et le damage
         float timeToWait = (float)(time - NetworkManager.ServerTime.Time);
@@ -251,13 +278,37 @@ public class Character : NetworkBehaviour, ITargetable
     }
 
 
+
+    [ClientRpc]
+    public void PlayAnimationClientRpc(CharacterSkillAnimation animation)
+    {
+        switch(animation)
+        {
+            case CharacterSkillAnimation.Attack:
+                animator.SetTrigger("Attack1");
+                break;
+            case CharacterSkillAnimation.Skill1:
+                animator.Play(skillsDatas[0].Attack.name);
+                break;
+            case CharacterSkillAnimation.Skill2:
+                animator.Play(skillsDatas[1].Attack.name);
+                break;
+            case CharacterSkillAnimation.Skill3:
+                animator.Play(skillsDatas[2].Attack.name);
+                break;
+        }
+    }
+
+
     // Partie ITargetable
     // Appelé par le serveur généralement
     public void TakeDamage(AttackMessage attackMessage)
     {
-        health.Value = health.Value - attackMessage.Damage;
+        float hp = health.Value - attackMessage.Damage;
+        hp = Mathf.Clamp(hp, 0, maxHealth);
+        health.Value = (int)hp;
 
-        if(attackMessage.Damage > 0)
+        if (attackMessage.Damage > 0)
             AnimationDamageClientRpc();
     }
 

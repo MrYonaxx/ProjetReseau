@@ -6,6 +6,7 @@ using Unity.Netcode;
 
 public class BossStateP1_Spread : BossState
 {
+    [Space]
     [SerializeField]
     Vector2Int time;
     [SerializeField]
@@ -28,16 +29,17 @@ public class BossStateP1_Spread : BossState
         t -= Time.deltaTime;
         if(t <= 0)
         {
-            for (int i = 0; i < NetworkManager.Singleton.ConnectedClients.Count; i++)
+            for (int i = 0; i < PlayerTeam.Instance.players.Count; i++)
             {
-                CreateAoE(NetworkManager.Singleton.ConnectedClients[(ulong)i].PlayerObject.transform);
+                CreateAoE(PlayerTeam.Instance.players[i].transform);
             }
 
             boss.PlayBossAnimationClientRpc(AnimationBoss.Attack2);
             t = Random.Range(time.x, time.y) * 3;
-            boss.SetState(endStates[Random.Range(0, endStates.Length - 1)]);
-        }
 
+            if (!CheckNextPhase(boss))
+                boss.SetState(endStates[Random.Range(0, endStates.Length)]);
+        }
     }
 
 

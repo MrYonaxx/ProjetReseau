@@ -17,11 +17,6 @@ public class HUDPlayer : MonoBehaviour
     float maxHP = 0;
     Character character = null;
 
-    // Start is called before the first frame update
-    /*void Start()
-    {
-        NetworkManager.Singleton.OnClientConnectedCallback += AssignCharacter;
-    }*/
 
     private void OnDestroy()
     {
@@ -29,26 +24,15 @@ public class HUDPlayer : MonoBehaviour
             character.GetHealthVariable().OnValueChanged -= DrawHP;
     }
 
-
-
-
-    // Faire un singleton avec une network Variable et quand les perso spawn ils previennent le singleton
-
-    public void AssignCharacter(ulong id)
+    public void AssignCharacter(Character c, int id)
     {
         gameObject.SetActive(true);
 
-        character = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(id).GetComponent<Character>();
+        character = c;
         character.GetHealthVariable().OnValueChanged += DrawHP;
         maxHP = character.GetMaxHealth();
-        textPlayerName.text = "Player " + (id + 1).ToString();
-
-        NetworkManager.Singleton.OnClientConnectedCallback -= AssignCharacter;
-
-        if(id == NetworkManager.Singleton.LocalClientId)
-        {
-
-        }
+        textPlayerName.text = "Player " + (id).ToString();
+        DrawHP(0, character.GetHealthVariable().Value);
     }
 
     public void DrawHP(int oldHP, int newHP)

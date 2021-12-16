@@ -4,12 +4,12 @@ using UnityEngine;
 using Unity.Netcode;
 
 [RequireComponent(typeof(Collider))]
-public class AreaOfEffect : NetworkBehaviour
+public class AreaOfEffectStack : NetworkBehaviour
 {
     [SerializeField]
     float time = 1;
     [SerializeField]
-    int damage = 3;
+    float damage = 3;
     float t = 0f;
 
     List<Character> characters;
@@ -56,17 +56,12 @@ public class AreaOfEffect : NetworkBehaviour
         if(t > time)
         {
             AttackMessage attackDmg = new AttackMessage();
-            attackDmg.Damage = damage;
+            attackDmg.Damage = (int)(damage / characters.Count);
             for (int i = 0; i < characters.Count; i++)
             {
                 characters[i].TakeDamage(attackDmg);
             }
             Destroy(this.gameObject);
-
-            // Ces trucs peuvent être utilisés pour plus de précisions dans la syncro entre les clients et les serveurs
-            // Je sais pas comment c'est implémenté par contre je doute que ça règle tout de manière magique
-            //NetworkManager.LocalTime.Time;
-            //NetworkManager.ServerTime.Time;
         }
     }
 }

@@ -6,13 +6,17 @@ using Unity.Netcode;
 
 public class BossStateP1 : BossState
 {
+    [Space]
     [SerializeField]
     Vector2Int time;
     [SerializeField]
     NetworkObject bossAoE = null;
+    [SerializeField]
+    bool tryParent = false;
 
     [SerializeField]
     BossState[] endStates = null;
+
 
     List<Character> players;
     Character target = null;
@@ -22,7 +26,7 @@ public class BossStateP1 : BossState
     public override void StartState(Boss boss)
     {
         t = Random.Range(time.x, time.y);
-        target = NetworkManager.Singleton.ConnectedClients[(ulong)Random.Range(0, NetworkManager.Singleton.ConnectedClients.Count)].PlayerObject.GetComponent<Character>();
+        target = PlayerTeam.Instance.players[Random.Range(0, PlayerTeam.Instance.players.Count)];
     }
     public override void UpdateState(Boss boss)
     {
@@ -34,8 +38,10 @@ public class BossStateP1 : BossState
             CreateAoE(target.transform);
             boss.PlayBossAnimationClientRpc(AnimationBoss.Attack1);
             t = Random.Range(time.x, time.y) * 3;
-            target = NetworkManager.Singleton.ConnectedClients[(ulong)Random.Range(0, NetworkManager.Singleton.ConnectedClients.Count)].PlayerObject.GetComponent<Character>();
-            boss.SetState(endStates[Random.Range(0, endStates.Length - 1)]);
+            target = PlayerTeam.Instance.players[Random.Range(0, PlayerTeam.Instance.players.Count)]; 
+
+            if(!CheckNextPhase(boss))
+                boss.SetState(endStates[Random.Range(0, endStates.Length)]);
         }
 
     }
@@ -45,5 +51,7 @@ public class BossStateP1 : BossState
     {
         NetworkObject go = Instantiate(bossAoE, target.position, Quaternion.identity);
         go.Spawn();
+        if (tryParent)
+            go.TrySetParent(target);
     }
 }

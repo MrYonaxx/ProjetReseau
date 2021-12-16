@@ -17,28 +17,17 @@ public class HUDPlayerList : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        NetworkManager.Singleton.OnClientConnectedCallback += AssignCharacter;
+        PlayerTeam.Instance.OnPlayerAdded += AssignCharacter;
     }
 
     private void OnDestroy()
     {
-        //NetworkManager.Singleton.OnClientConnectedCallback -= AssignCharacter;
+        PlayerTeam.Instance.OnPlayerAdded -= AssignCharacter;
     }
 
-
-
-    public void AssignCharacter(ulong id)
+    public void AssignCharacter(Character c, int id)
     {
-        hudPlayers[index].AssignCharacter(id);
-
-        if(index == 0) // On check tout les client déjà existants
-        {
-            for (int i = 0; i < NetworkManager.Singleton.ConnectedClientsIds.Count-1; i++)
-            {
-                index++;
-                hudPlayers[index].AssignCharacter((ulong)i);
-            }
-        }
+        hudPlayers[index].AssignCharacter(c, id);
         index++;
     }
 

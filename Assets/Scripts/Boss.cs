@@ -41,7 +41,11 @@ public class Boss : NetworkBehaviour, ITargetable
     public override void OnNetworkSpawn()
     {
         if (IsServer)
-            SetState(currentState);
+        {
+            if(currentState != null)
+                SetState(currentState);
+        }
+
     }
 
     // Update is called once per frame
@@ -49,7 +53,8 @@ public class Boss : NetworkBehaviour, ITargetable
     {
         if(IsServer && !isDead)
         {
-            currentState.UpdateState(this);
+            if (currentState != null)
+                currentState.UpdateState(this);
         }
     }
 

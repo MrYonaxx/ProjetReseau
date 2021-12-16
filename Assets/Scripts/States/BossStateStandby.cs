@@ -4,39 +4,24 @@ using UnityEngine;
 using Unity.Netcode;
 
 
-public class BossStateStandby : BossState
+public class BossStateStandby : NetworkBehaviour
 {
     [SerializeField]
-    BossState stateP1 = null;
+    Boss boss = null;
     [SerializeField]
-    float waitChangeState = 2f;
+    BossState stateP1 = null;
 
-
-    float t = 0f;
-    bool start = false;
-
-    public override void StartState(Boss boss)
+    void OnTriggerEnter(Collider other)
     {
-        if (NetworkManager.Singleton.ConnectedClientsList.Count != 0)
-            start = true;
-        else
-            NetworkManager.Singleton.OnClientConnectedCallback += StartBoss;
-        t = waitChangeState;
-    }
-
-    public override void UpdateState(Boss boss)
-    {
-        if (start)
+        if (IsServer)
         {
-            t -= Time.deltaTime;
-            if (t <= 0)
+            Character c = other.GetComponent<Character>();
+            if (c != null)
+            {
                 boss.SetState(stateP1);
+            }
+            Destroy(this.gameObject);
         }
     }
 
-    void StartBoss(ulong id)
-    {   
-        start = true;
-        NetworkManager.Singleton.OnClientConnectedCallback -= StartBoss;
-    }
 }

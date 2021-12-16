@@ -35,7 +35,9 @@ public class BossStateP1_Stack : BossState
             boss.PlayBossAnimationClientRpc(AnimationBoss.Attack1);
             t = Random.Range(time.x, time.y) * 3;
             target = NetworkManager.Singleton.ConnectedClients[(ulong)Random.Range(0, NetworkManager.Singleton.ConnectedClients.Count)].PlayerObject.GetComponent<Character>();
-            boss.SetState(endStates[Random.Range(0, endStates.Length - 1)]);
+            
+            if (!CheckNextPhase(boss))
+                boss.SetState(endStates[Random.Range(0, endStates.Length)]);
         }
 
     }

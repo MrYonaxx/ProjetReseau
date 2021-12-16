@@ -22,6 +22,7 @@ public class HUDSkill : MonoBehaviour
     void Start()
     {
         NetworkManager.Singleton.OnClientConnectedCallback += AssignCharacter;
+        this.gameObject.SetActive(false);
     }
 
     void OnDestroy()
@@ -35,6 +36,7 @@ public class HUDSkill : MonoBehaviour
 
     public void AssignCharacter(ulong id)
     {
+        this.gameObject.SetActive(true);
         if (id == NetworkManager.Singleton.LocalClientId)
         {
             character = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<Character>();

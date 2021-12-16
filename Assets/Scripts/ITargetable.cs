@@ -6,6 +6,7 @@ using Unity.Netcode;
 public struct AttackMessage
 {
     public int Damage;
+    public CharacterSkillAnimation AnimationID;
 }
 
 public delegate void ActionTarget(ITargetable target);

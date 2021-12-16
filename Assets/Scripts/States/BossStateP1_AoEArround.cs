@@ -6,6 +6,7 @@ using Unity.Netcode;
 
 public class BossStateP1_AoEArround : BossState
 {
+    [Space]
     [SerializeField]
     Vector2Int time;
     [SerializeField]
@@ -15,6 +16,8 @@ public class BossStateP1_AoEArround : BossState
 
     [SerializeField]
     BossState[] endStates = null;
+
+
 
     //List<Character> players;
     //Character target = null;
@@ -33,7 +36,9 @@ public class BossStateP1_AoEArround : BossState
         {
             CreateAoE(transform);
             boss.PlayBossAnimationClientRpc(AnimationBoss.Attack3);
-            boss.SetState(endStates[Random.Range(0, endStates.Length - 1)]);
+
+            if (!CheckNextPhase(boss))
+                boss.SetState(endStates[Random.Range(0, endStates.Length)]);
         }
 
     }
